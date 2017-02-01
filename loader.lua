@@ -241,6 +241,7 @@ for index,value in ipairs(loader.export) do
  elseif type(target) == "boolean" or type(target) == "number" or type(target) == "string" then
   loader_export(value,target)
  elseif type(target) == "table" then
+  loader_export(value,"")
   loader_recursive_export(value,target)
  end
 end
