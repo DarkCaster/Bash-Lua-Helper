@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 
--- Copyright (c) 2016 DarkCaster, MIT License, see https://github.com/DarkCaster/Linux-Helper-Tools for more info
+-- Copyright (c) 2016-2017 DarkCaster, MIT License, see https://github.com/DarkCaster/Bash-Lua-Helper for more info
 
 -- helper script basic logic:
 
