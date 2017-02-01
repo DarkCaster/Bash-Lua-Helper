@@ -8,5 +8,13 @@ You need an installed lua interpreter in your system. Tested with Lua v5.2.2
 
 The project is split into a separate repository from https://github.com/DarkCaster/Linux-Helper-Tools
 
-TODO: usage description and examples. for now see example.sh source for usage example
+TODO: usage description and examples.
+
+For now see example.sh source for usage example
+
+Other examples:
+
+https://github.com/DarkCaster/Linux-Helper-Tools/tree/master/WineLauncher
+
+https://github.com/DarkCaster/Sandboxer
 
