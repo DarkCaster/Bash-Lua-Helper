@@ -6,8 +6,6 @@ You can also put all verification logic to a separate script, that will be execu
 
 You need an installed lua interpreter in your system. Tested with Lua v5.2.2
 
-The project is split into a separate repository from https://github.com/DarkCaster/Linux-Helper-Tools
-
 TODO: usage description and examples.
 
 For now see example.sh source for usage example
