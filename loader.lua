@@ -229,6 +229,7 @@ function loader_recursive_export(name,node)
   if type(value) == "boolean" or type(value) == "number" or type(value) == "string" then
    loader_export(cur_name,value)
   elseif type(value) == "table" then
+   loader_export(cur_name,"")
    loader_recursive_export(cur_name,value)
   end
  end
