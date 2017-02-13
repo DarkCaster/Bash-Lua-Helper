@@ -50,9 +50,8 @@ lua_helper_showusage () {
  lua_helper_log_error "-h show this help"
  lua_helper_log_error ""
  lua_helper_log_error "lua binary detection options:"
- lua_helper_log_error "-y <version>. enforce lua version, script will fail if lua version do not match."
- lua_helper_log_error " version-number digits compared independently, comparasion routine ended when last digit match check complete. for example -x 5.2 will match lua 5.2.1 or 5.2.4."
- lua_helper_log_error "-z <path to lua binary>. enforce path to lua binary, do not perform automatic search for lua binary with maximum supported version."
+ lua_helper_log_error "-y <version> enforce minimal lua version."
+ lua_helper_log_error "-z <path to lua binary> enforce path to lua binary, do not perform automatic search for lua binary with supported version."
  lua_helper_teardown
  exit 100
 }
@@ -94,11 +93,14 @@ lua_add_param "-t"
 lua_add_param "$lua_cache_dir"
 shift 1
 
+lua_binary=""
+lua_version=""
+
 lua_helper_parseopts () {
  local lua_pre_script=""
  local lua_post_script=""
  local optname
- while getopts ":e:b:a:o:w:r:l:hx" optname
+ while getopts ":e:b:a:o:w:r:l:y:z:hx" optname
  do
   case "$optname" in
    "e")
@@ -135,6 +137,12 @@ lua_helper_parseopts () {
      lua_helper_check_bad_chars_bash "$OPTARG" "export list variable name"
      lua_export_list_name="$OPTARG"
    ;;
+   "y")
+     lua_version="$OPTARG"
+   ;;
+   "z")
+     lua_binary="$OPTARG"
+   ;;
    "x")
      break
    ;;
@@ -166,7 +174,49 @@ lua_helper_parseopts "$@"
 shift $lua_params_shift
 lua_add_param "--"
 
-lua "$lua_helper_dir/loader.lua" "${lua_startup_params[@]}" "$@"
+lua_probe_version() {
+ local lua_binary="$1"
+ local min_version="$2"
+ local act_version=`2>&1 "$lua_binary" -v | sed -n "s|^Lua\s\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\).*\$|\1 \2 \3|p"`
+ test -z "$act_version" && return 1
+ min_version=`echo "$min_version" | sed -n "s|\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)|\1 \2 \3|p"`
+ test -z "$min_version" && lua_helper_log_error "incorrect version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
+ act_version=( $act_version )
+ min_version=( $min_version )
+ local cnt="-1"
+ for act_num in "${act_version[@]}"
+ do
+  cnt=$((cnt+1))
+  test "$act_num" -gt "${min_version[$cnt]}" && return 0
+  test "$act_num" -eq "${min_version[$cnt]}" && continue || return 1
+ done
+ return 0
+}
+
+lua_probe_binary() {
+ local hints=( $1 )
+ local min_version="$2"
+ test ! -z "$lua_binary" && hints=( "$lua_binary" ) && lua_binary=""
+ test ! -z "$lua_version" && min_version="$lua_version"
+ for hint in "${hints[@]}"
+ do
+  hint=`2>/dev/null which "$hint"`
+  #debug
+  #echo "probing lua binary: $hint"
+  if [ ! -z "$hint" ] && lua_probe_version "$hint" "$min_version"; then
+   lua_binary="$hint"
+   break
+  fi
+ done
+ test -z "$lua_binary" && lua_helper_log_error "lua detection failed!" && exit 1
+}
+
+lua_probe_binary "lua lua5.1 lua51 lua5.2 lua52 lua5.3 lua53" "5.1.0"
+
+#debug
+#echo "using lua binary: $lua_binary"
+
+"$lua_binary" "$lua_helper_dir/loader.lua" "${lua_startup_params[@]}" "$@"
 
 if [ "$?" != "0" ]; then
  lua_helper_log_error "loader.lua script failed"
@@ -208,6 +258,8 @@ unset -f lua_helper_showusage
 unset -f lua_helper_teardown
 unset -f lua_helper_log_error
 unset -f lua_add_param
+unset -f lua_probe_version
+unset -f lua_probe_binary
 unset lua_helper_dir
 unset lua_cache_dir
 unset lua_startup_params
@@ -217,4 +269,5 @@ unset lua_result_name
 unset lua_export_list_name
 unset lua_config_script
 unset lua_workdir
-
+unset lua_binary
+unset lua_version
