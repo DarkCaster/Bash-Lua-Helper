@@ -46,6 +46,11 @@ lua_helper_showusage () {
  lua_helper_log_error "-r <associative array name> name of associative array, that will contain all exported variables from lua script. by default will be used name \"cfg\""
  lua_helper_log_error "-l <variable name> custom variable name that will contain list (multiline) of all exported variables. by default will be used name \"cfg_list\""
  lua_helper_log_error "-h show this help"
+ lua_helper_log_error ""
+ lua_helper_log_error "lua binary detection options:"
+ lua_helper_log_error "-x <version>. enforce lua version, script will fail if lua version do not match."
+ lua_helper_log_error " version-number digits compared independently, comparasion routine ended when last digit match check complete. for example -x 5.2 will match lua 5.2.1 or 5.2.4."
+ lua_helper_log_error "-z <path to lua binary>. enforce path to lua binary, do not perform automatic search for lua binary with maximum supported version."
  lua_helper_teardown
  exit 100
 }
