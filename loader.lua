@@ -41,6 +41,7 @@ function loader_show_usage()
  print("-pre <script>: Optional lua script, executed before main config script. May contain some additional functions for use with main script. Non zero exit code aborts further execution.")
  print("-post <script>: Optional lua script, executed after main config script. May contain some some verification logic for use with main script. Non zero exit code aborts further execution.")
  print("-ext <string>: You may pass multiple -ext params. Add extra string and store it inside loader.extra table (indexed by number, starting from 1). You can refer loader.extra elements in your config/pre/post scripts")
+ print("-ver <version formatted with spaces>: Add lua version string. Reserved for internal use. Current lua version numbers will be saved to loader.lua_version table starting from index 1")
  print("-- mark completion of option list for this script. all remaining options will be stored in loader.args starting from index 1")
  os.exit(1)
 end
