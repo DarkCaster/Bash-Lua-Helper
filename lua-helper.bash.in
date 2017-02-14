@@ -49,9 +49,11 @@ lua_helper_showusage () {
  lua_helper_log_error " and will be stored in loader.args table starting from index 1"
  lua_helper_log_error "-h show this help"
  lua_helper_log_error ""
- lua_helper_log_error "lua binary detection options:"
- lua_helper_log_error "-y <version> enforce minimal lua version."
- lua_helper_log_error "-Y <version> enforce maximal lua version."
+ lua_helper_log_error "options to override lua binary detection logic."
+ lua_helper_log_error "by default, only supported lua versions at standard paths will be used."
+ lua_helper_log_error "for now it will search and use lua with versions from 5.2.0 to 5.3.999"
+ lua_helper_log_error "-y <version> enforce min lua version. if this option passed without Y option, it will not enforce max lua version (and print warning)"
+ lua_helper_log_error "-Y <version> enforce max lua version. if this option passed without y option, it will not enforce min lua version (and print warning)"
  lua_helper_log_error "-z <path to lua binary> enforce path to lua binary, do not perform automatic search for lua binary."
  lua_helper_teardown
  exit 100
