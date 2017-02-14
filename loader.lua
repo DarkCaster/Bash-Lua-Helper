@@ -99,6 +99,7 @@ for i,ar in ipairs(arg) do
    if ver_cnt == 3 then
     par = "none"
     set = false
+    loader.lua_version.num=loader.lua_version[1]*1000*1000+loader.lua_version[2]*1000+loader.lua_version[3]
    end
   elseif par == "add_args" then
    args_cnt=args_cnt+1

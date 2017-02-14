@@ -39,6 +39,7 @@ echo "example.bash says: (should be empty, because it is a container) cfg[config
 echo "example.bash says: cfg[config.sub.lua_v1] = ${cfg[config.sub.lua_v1]}"
 echo "example.bash says: cfg[config.sub.lua_v2] = ${cfg[config.sub.lua_v2]}"
 echo "example.bash says: cfg[config.sub.lua_v3] = ${cfg[config.sub.lua_v3]}"
+echo "example.bash says: cfg[config.sub.lua_num] = ${cfg[config.sub.lua_num]}"
 echo "example.bash says: cfg[config.sub.number1] = ${cfg[config.sub.number1]}"
 echo "example.bash says: cfg[config.sub.string] = ${cfg[config.sub.string]}"
 echo "example.bash says: cfg[config.sub.problematic_string] = ${cfg[config.sub.problematic_string]}"
