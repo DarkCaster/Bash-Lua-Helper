@@ -249,7 +249,13 @@ function loader_recursive_export(name,node)
 end
 
 for index,value in ipairs(loader.export) do
- local status,target=pcall(load("return " .. value))
+ local status=false
+ local target
+ if loader.lua_version.num>=5002000 then
+  status,target=pcall(load("return " .. value))
+ else
+  status,target=pcall(loadstring("return " .. value))
+ end
  if status == false or type(target) == "nil" then
   loader.log("requested global variable or table with name %s is not exist",value)
  elseif type(target) == "boolean" or type(target) == "number" or type(target) == "string" then

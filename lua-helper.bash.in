@@ -219,7 +219,7 @@ lua_probe_binary() {
 }
 
 if [ -z "$lua_min_version" ] && [ -z "$lua_max_version" ]; then
- lua_min_version="5.2.0"
+ lua_min_version="5.1.0"
  lua_max_version="5.3.999"
 elif [ -z "$lua_min_version" ] && [ ! -z "$lua_max_version" ]; then
  lua_min_version="0.0.0"
@@ -235,7 +235,7 @@ if [ ! -z "$lua_binary" ]; then
  lua_binary=""
  lua_probe_binary "$lua_hint" "$lua_min_version" "$lua_max_version"
 else
- lua_probe_binary "lua lua5.3 lua53 lua5.2 lua52" "$lua_min_version" "$lua_max_version"
+ lua_probe_binary "lua lua5.3 lua53 lua5.2 lua52 lua5.1 lua51" "$lua_min_version" "$lua_max_version"
 fi
 
 
