@@ -51,7 +51,8 @@ lua_helper_showusage () {
  lua_helper_log_error ""
  lua_helper_log_error "lua binary detection options:"
  lua_helper_log_error "-y <version> enforce minimal lua version."
- lua_helper_log_error "-z <path to lua binary> enforce path to lua binary, do not perform automatic search for lua binary with supported version."
+ lua_helper_log_error "-Y <version> enforce maximal lua version."
+ lua_helper_log_error "-z <path to lua binary> enforce path to lua binary, do not perform automatic search for lua binary."
  lua_helper_teardown
  exit 100
 }
@@ -94,13 +95,13 @@ lua_add_param "$lua_cache_dir"
 shift 1
 
 lua_binary=""
-lua_version=""
+lua_min_version=""
 
 lua_helper_parseopts () {
  local lua_pre_script=""
  local lua_post_script=""
  local optname
- while getopts ":e:b:a:o:w:r:l:y:z:hx" optname
+ while getopts ":e:b:a:o:w:r:l:y:Y:z:hx" optname
  do
   case "$optname" in
    "e")
@@ -138,7 +139,10 @@ lua_helper_parseopts () {
      lua_export_list_name="$OPTARG"
    ;;
    "y")
-     lua_version="$OPTARG"
+     lua_min_version="$OPTARG"
+   ;;
+   "Y")
+     lua_max_version="$OPTARG"
    ;;
    "z")
      lua_binary="$OPTARG"
@@ -176,19 +180,16 @@ lua_add_param "--"
 
 lua_probe_version() {
  local lua_binary="$1"
- local min_version="$2"
+ local min_version=( $2 )
+ local max_version=( $3 )
  local act_version=`2>&1 "$lua_binary" -v | sed -n "s|^Lua\s\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\).*\$|\1 \2 \3|p"`
  test -z "$act_version" && return 1
- min_version=`echo "$min_version" | sed -n "s|\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)|\1 \2 \3|p"`
- test -z "$min_version" && lua_helper_log_error "incorrect version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
  act_version=( $act_version )
- min_version=( $min_version )
  local cnt="-1"
  for act_num in "${act_version[@]}"
  do
   cnt=$((cnt+1))
-  test "$act_num" -gt "${min_version[$cnt]}" && return 0
-  test "$act_num" -eq "${min_version[$cnt]}" && continue || return 1
+  test "$act_num" -ge "${min_version[$cnt]}" -a "$act_num" -le "${max_version[$cnt]}" && continue || return 1
  done
  return 0
 }
@@ -196,22 +197,46 @@ lua_probe_version() {
 lua_probe_binary() {
  local hints=( $1 )
  local min_version="$2"
+ local max_version="$3"
  test ! -z "$lua_binary" && hints=( "$lua_binary" ) && lua_binary=""
- test ! -z "$lua_version" && min_version="$lua_version"
+ min_version=`echo "$min_version" | sed -n "s|\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)|\1 \2 \3|p"`
+ test -z "$min_version" && lua_helper_log_error "incorrect minimum version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
+ max_version=`echo "$max_version" | sed -n "s|\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)|\1 \2 \3|p"`
+ test -z "$max_version" && lua_helper_log_error "incorrect maximum version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
  for hint in "${hints[@]}"
  do
   hint=`2>/dev/null which "$hint"`
   #debug
   #echo "probing lua binary: $hint"
-  if [ ! -z "$hint" ] && lua_probe_version "$hint" "$min_version"; then
+  if [ ! -z "$hint" ] && lua_probe_version "$hint" "$min_version" "$max_version"; then
    lua_binary="$hint"
    break
   fi
  done
- test -z "$lua_binary" && lua_helper_log_error "lua detection failed!" && exit 1
 }
 
-lua_probe_binary "lua lua5.1 lua51 lua5.2 lua52 lua5.3 lua53" "5.1.0"
+if [ -z "$lua_min_version" ] && [ -z "$lua_max_version" ]; then
+ lua_min_version="5.2.0"
+ lua_max_version="5.3.999"
+elif [ -z "$lua_min_version" ] && [ ! -z "$lua_max_version" ]; then
+ lua_min_version="0.0.0"
+ lua_helper_log_error "restricting lua max version only, it may not work as intended if your lua interpreter is too old"
+elif [ ! -z "$lua_min_version" ] && [ -z "$lua_max_version" ]; then
+ lua_max_version="999.999.999"
+ lua_helper_log_error "restricting lua min version only, it may not work as intended if your lua interpreter is too new and not tested!"
+fi
+
+if [ ! -z "$lua_binary" ]; then
+ lua_helper_log_error "probing enforced lua binary at $lua_binary"
+ lua_hint="$lua_binary"
+ lua_binary=""
+ lua_probe_binary "$lua_hint" "$lua_min_version" "$lua_max_version"
+else
+ lua_probe_binary "lua lua5.3 lua53 lua5.2 lua52" "$lua_min_version" "$lua_max_version"
+fi
+
+
+test -z "$lua_binary" && lua_helper_log_error "failed to detect lua interpreter with proper version!" && exit 1
 
 #debug
 #echo "using lua binary: $lua_binary"
@@ -270,4 +295,5 @@ unset lua_export_list_name
 unset lua_config_script
 unset lua_workdir
 unset lua_binary
-unset lua_version
+unset lua_min_version
+unset lua_max_version
