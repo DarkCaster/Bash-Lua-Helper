@@ -98,6 +98,7 @@ shift 1
 
 lua_binary=""
 lua_min_version=""
+lua_act_version=""
 
 lua_helper_parseopts () {
  local lua_pre_script=""
@@ -184,11 +185,11 @@ lua_probe_version() {
  local lua_binary="$1"
  local min_version=( $2 )
  local max_version=( $3 )
- local act_version=`2>&1 "$lua_binary" -v | sed -n "s|^Lua\s\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\).*\$|\1 \2 \3|p"`
- test -z "$act_version" && return 1
- act_version=( $act_version )
+ lua_act_version=`2>&1 "$lua_binary" -v | sed -n "s|^Lua\s\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\).*\$|\1 \2 \3|p"`
+ test -z "$lua_act_version" && return 1
+ lua_act_version=( $lua_act_version )
  local cnt="-1"
- for act_num in "${act_version[@]}"
+ for act_num in "${lua_act_version[@]}"
  do
   cnt=$((cnt+1))
   test "$act_num" -ge "${min_version[$cnt]}" -a "$act_num" -le "${max_version[$cnt]}" && continue || return 1
@@ -239,11 +240,10 @@ fi
 
 
 test -z "$lua_binary" && lua_helper_log_error "failed to detect lua interpreter with proper version!" && exit 1
-
 #debug
 #echo "using lua binary: $lua_binary"
 
-"$lua_binary" "$lua_helper_dir/loader.lua" "${lua_startup_params[@]}" "$@"
+"$lua_binary" "$lua_helper_dir/loader.lua" -ver "${lua_act_version[@]}" "${lua_startup_params[@]}" "$@"
 
 if [ "$?" != "0" ]; then
  lua_helper_log_error "loader.lua script failed"
@@ -299,3 +299,4 @@ unset lua_workdir
 unset lua_binary
 unset lua_min_version
 unset lua_max_version
+unset lua_act_version

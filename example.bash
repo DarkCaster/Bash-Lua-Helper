@@ -36,6 +36,9 @@ echo "example.bash says: cfg[config.paths.tempdir_raw] = ${cfg[config.paths.temp
 echo "example.bash says: cfg[config.paths.workdir_raw] = ${cfg[config.paths.workdir_raw]}"
 echo "example.bash says: cfg[config.paths.dynpath_raw] = ${cfg[config.paths.dynpath_raw]}"
 echo "example.bash says: (should be empty, because it is a container) cfg[config.sub] = ${cfg[config.sub]}"
+echo "example.bash says: cfg[config.sub.lua_v1] = ${cfg[config.sub.lua_v1]}"
+echo "example.bash says: cfg[config.sub.lua_v2] = ${cfg[config.sub.lua_v2]}"
+echo "example.bash says: cfg[config.sub.lua_v3] = ${cfg[config.sub.lua_v3]}"
 echo "example.bash says: cfg[config.sub.number1] = ${cfg[config.sub.number1]}"
 echo "example.bash says: cfg[config.sub.string] = ${cfg[config.sub.string]}"
 echo "example.bash says: cfg[config.sub.problematic_string] = ${cfg[config.sub.problematic_string]}"
@@ -43,4 +46,3 @@ echo "example.bash says: cfg[config.sub.non_latin_string] = ${cfg[config.sub.non
 echo "example.bash says: cfg[config.sub.sub.message] = ${cfg[config.sub.sub.message]}"
 echo "example.bash says: cfg[config.sub.sub.message2] = ${cfg[config.sub.sub.message2]}"
 echo "example.bash says: cfg[config.sub.multiline_string] = ${cfg[config.sub.multiline_string]}"
-

@@ -17,6 +17,7 @@ loader={}
 loader["export"]={}
 loader["extra"]={}
 loader["args"]={}
+loader["lua_version"]={}
 loader.pathseparator=package.config:sub(1,1)
 loader.slash=loader.pathseparator
 
@@ -88,10 +89,18 @@ par="none"
 export_cnt=0
 extra_cnt=0
 args_cnt=0
+ver_cnt=0
 
 for i,ar in ipairs(arg) do
  if set == true then
-  if par == "add_args" then
+  if par == "add_version" then
+   ver_cnt=ver_cnt+1
+   loader.lua_version[ver_cnt] = tonumber(string.format("%s",ar))
+   if ver_cnt == 3 then
+    par = "none"
+    set = false
+   end
+  elseif par == "add_args" then
    args_cnt=args_cnt+1
    loader.args[args_cnt] = string.format("%s",ar)
   else
@@ -125,7 +134,8 @@ for i,ar in ipairs(arg) do
    extra_cnt=extra_cnt+1
   elseif ar == "--" then
    par="add_args"
-   set_args=true
+  elseif ar == "-ver" then
+   par="add_version"
   else
    print("incorrect parameter: " .. ar)
    print()
@@ -152,6 +162,7 @@ extra_cnt=nul
 set=nil
 par=nil
 args_cnt=nil
+ver_cnt=nil
 loader_show_usage=nil
 loader_param_set_check=nil
 loader_param_not_set_check=nil

@@ -17,6 +17,9 @@ config =
 		{
 			message="another message",
 		},
+        lua_v1=loader.lua_version[1],
+        lua_v2=loader.lua_version[2],
+        lua_v3=loader.lua_version[3],
 	},
 	paths=
 	{
