@@ -12,7 +12,7 @@ config =
 		string="123x",
 		multiline_string="line1\nline2\nline3",
 		non_latin_string="Съешь еще этих мягких мексиканских кактусов, да выпей текилы",
-		problematic_string=" $ $$ & && \\ \\\\ ! !! [ [[ ] ]] ( (( ) )) ' '' \" \"\" ` `` \\n \\t \\r / // ? ?? !",
+		problematic_string=" $ $$ & && \\ - [1] \\\\ - [2] \\\\\\ - [3] ! !! [ [[ ] ]] ( (( ) )) ' '' \" \"\" ` `` \\n \\t \\r / // /// ? ?? !",
 		sub=
 		{
 			message="another message",
