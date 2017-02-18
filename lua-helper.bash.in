@@ -197,7 +197,9 @@ if [ -z "$lua_cache_dir" ]; then
 fi
 
 #create real cache dir
-lua_cache_dir=`mktemp -d -p "$lua_cache_dir" -t "lua-helper-XXXXXX"`
+lua_cache_dir=`2>/dev/null mktemp -d -p "$lua_cache_dir" -t "lua-helper-XXXXXX"`
+test -z "$lua_cache_dir" && lua_helper_log_error "Failed to create temp directory!" && exit 1
+
 lua_add_param "-t"
 lua_add_param "$lua_cache_dir"
 lua_add_param "--"
