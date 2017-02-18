@@ -8,7 +8,7 @@
 
 lua_helper_dir="$( cd "$( dirname "$BASH_SOURCE" )" && pwd )"
 
-lua_cache_dir=""
+lua_temp_dir=""
 lua_startup_params=()
 lua_startup_param_cnt=0
 lua_params_shift=0
@@ -25,7 +25,7 @@ lua_helper_log_error () {
 }
 
 lua_helper_teardown () {
- test ! -z "$lua_cache_dir" && rm -rf "$lua_cache_dir"
+ test ! -z "$lua_temp_dir" && rm -rf "$lua_temp_dir"
  true
 }
 
@@ -142,8 +142,8 @@ lua_helper_parseopts () {
      lua_export_list_name="$OPTARG"
    ;;
    "t")
-     lua_cache_dir="$OPTARG"
-     test -z "$lua_cache_dir" -o ! -d "$lua_cache_dir" && lua_helper_log_error "incorrect base temp directory provided: $lua_cache_dir" && lua_cache_dir="" && lua_helper_showusage
+     lua_temp_dir="$OPTARG"
+     test -z "$lua_temp_dir" -o ! -d "$lua_temp_dir" && lua_helper_log_error "incorrect base temp directory provided: $lua_temp_dir" && lua_temp_dir="" && lua_helper_showusage
    ;;
    "y")
      lua_min_version="$OPTARG"
@@ -185,23 +185,23 @@ lua_helper_parseopts "$@"
 shift $lua_params_shift
 
 #temp directory
-if [ -z "$lua_cache_dir" ]; then
+if [ -z "$lua_temp_dir" ]; then
  #detect temp directory
  for target in "$TMPDIR" "/tmp" "$XDG_RUNTIME_DIR"
  do
   test -z "$target" -o ! -d "$target" -o -z "`2>/dev/null df -P -t tmpfs \"$target\"`" && continue
-  lua_cache_dir="$target"
+  lua_temp_dir="$target"
   break
  done
- test -z "$lua_cache_dir" && lua_cache_dir="/tmp"
+ test -z "$lua_temp_dir" && lua_temp_dir="/tmp"
 fi
 
 #create real cache dir
-lua_cache_dir=`2>/dev/null mktemp -d -p "$lua_cache_dir" -t "lua-helper-XXXXXX"`
-test -z "$lua_cache_dir" && lua_helper_log_error "Failed to create temp directory!" && exit 1
+lua_temp_dir=`2>/dev/null mktemp -d -p "$lua_temp_dir" -t "lua-helper-XXXXXX"`
+test -z "$lua_temp_dir" && lua_helper_log_error "Failed to create temp directory!" && exit 1
 
 lua_add_param "-t"
-lua_add_param "$lua_cache_dir"
+lua_add_param "$lua_temp_dir"
 lua_add_param "--"
 
 lua_probe_version() {
@@ -283,14 +283,14 @@ lua_helper_fill_result () {
  do
   #should not occur, if you do not touch anything inside loader.tmpdir from lua scripts
   lua_helper_check_bad_chars "$target" "filename with exported variable contents \"$target\""
-  eval $lua_result_name'['$target']'='$(<"'"$lua_cache_dir/$target"'")'
- done < <(ls -1 "$lua_cache_dir")
+  eval $lua_result_name'['$target']'='$(<"'"$lua_temp_dir/$target"'")'
+ done < <(ls -1 "$lua_temp_dir")
 }
 
 lua_helper_fill_result
 
 #create list (multiline variable) with all exported variables names
-eval $lua_export_list_name'=`ls -1 "'"$lua_cache_dir"'"`'
+eval $lua_export_list_name'=`ls -1 "'"$lua_temp_dir"'"`'
 
 lua_helper_teardown
 
@@ -311,7 +311,7 @@ unset -f lua_add_param
 unset -f lua_probe_version
 unset -f lua_probe_binary
 unset lua_helper_dir
-unset lua_cache_dir
+unset lua_temp_dir
 unset lua_startup_params
 unset lua_startup_param_cnt
 unset lua_params_shift
