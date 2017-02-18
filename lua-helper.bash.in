@@ -8,7 +8,7 @@
 
 lua_helper_dir="$( cd "$( dirname "$BASH_SOURCE" )" && pwd )"
 
-lua_cache_dir=`mktemp -d -t lua-helper-XXXXXXXX`
+lua_cache_dir=""
 lua_startup_params=()
 lua_startup_param_cnt=0
 lua_params_shift=0
@@ -25,7 +25,7 @@ lua_helper_log_error () {
 }
 
 lua_helper_teardown () {
- rm -rf "$lua_cache_dir"
+ test ! -z "$lua_cache_dir" && rm -rf "$lua_cache_dir"
  true
 }
 
@@ -94,8 +94,6 @@ lua_config_script=`realpath -s "$lua_config_script"`
 lua_workdir=`dirname $lua_config_script`
 lua_add_param "-c"
 lua_add_param "$lua_config_script"
-lua_add_param "-t"
-lua_add_param "$lua_cache_dir"
 shift 1
 
 lua_binary=""
@@ -106,7 +104,7 @@ lua_helper_parseopts () {
  local lua_pre_script=""
  local lua_post_script=""
  local optname
- while getopts ":e:b:a:o:w:r:l:y:Y:z:hx" optname
+ while getopts ":e:b:a:o:w:r:l:t:y:Y:z:hx" optname
  do
   case "$optname" in
    "e")
@@ -142,6 +140,10 @@ lua_helper_parseopts () {
    "l")
      lua_helper_check_bad_chars_bash "$OPTARG" "export list variable name"
      lua_export_list_name="$OPTARG"
+   ;;
+   "t")
+     lua_cache_dir="$OPTARG"
+     test -z "$lua_cache_dir" -o ! -d "$lua_cache_dir" && lua_helper_log_error "incorrect base temp directory provided: $lua_cache_dir" && lua_cache_dir="" && lua_helper_showusage
    ;;
    "y")
      lua_min_version="$OPTARG"
@@ -181,6 +183,23 @@ lua_helper_parseopts () {
 
 lua_helper_parseopts "$@"
 shift $lua_params_shift
+
+#temp directory
+if [ -z "$lua_cache_dir" ]; then
+ #detect temp directory
+ for target in "$TMPDIR" "/tmp" "$XDG_RUNTIME_DIR"
+ do
+  test -z "$target" -o ! -d "$target" -o -z "`2>/dev/null df -P -t tmpfs \"$target\"`" && continue
+  lua_cache_dir="$target"
+  break
+ done
+ test -z "$lua_cache_dir" && lua_cache_dir="/tmp"
+fi
+
+#create real cache dir
+lua_cache_dir=`mktemp -d -p "$lua_cache_dir" -t "lua-helper-XXXXXX"`
+lua_add_param "-t"
+lua_add_param "$lua_cache_dir"
 lua_add_param "--"
 
 lua_probe_version() {
