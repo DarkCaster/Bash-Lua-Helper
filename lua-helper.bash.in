@@ -47,6 +47,8 @@ lua_helper_showusage () {
  lua_helper_log_error "-l <variable name> custom variable name that will contain list (multiline) of all exported variables. by default will be used name \"cfg_list\""
  lua_helper_log_error "-x terminate command list for this script. all command line parameters after this option will be transferred to your lua config file,"
  lua_helper_log_error " and will be stored in loader.args table starting from index 1"
+ lua_helper_log_error "-t <temp directory> manually set base directory for temporary files that lua-helper create while exporting selected lua variables."
+ lua_helper_log_error " this directory will be automatically detected if omited: it will probe XDG_RUNTIME_DIR, /tmp, and will use one that mounted on tmpfs"
  lua_helper_log_error "-h show this help"
  lua_helper_log_error ""
  lua_helper_log_error "options to override lua binary detection logic."
