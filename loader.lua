@@ -70,7 +70,7 @@ function loader_set_param (name, value)
  if value == nil then
   error(string.format("param \"%s\" is not set",name))
  end
- loader[name]=string.format("%s",value)
+ loader[name]=tostring(value)
 end
 
 function loader_set_dir (name, value)
@@ -95,7 +95,7 @@ for i,ar in ipairs(arg) do
  if set == true then
   if par == "add_version" then
    ver_cnt=ver_cnt+1
-   loader.lua_version[ver_cnt] = tonumber(string.format("%s",ar))
+   loader.lua_version[ver_cnt] = tonumber(tostring(ar))
    if ver_cnt == 3 then
     par = "none"
     set = false
@@ -103,12 +103,12 @@ for i,ar in ipairs(arg) do
    end
   elseif par == "add_args" then
    args_cnt=args_cnt+1
-   loader.args[args_cnt] = string.format("%s",ar)
+   loader.args[args_cnt] = tostring(ar)
   else
    if par == "add_export" then
-    loader.export[export_cnt] = string.format("%s",ar)
+    loader.export[export_cnt] = tostring(ar)
    elseif par == "add_extra" then
-    loader.extra[extra_cnt] = string.format("%s",ar)
+    loader.extra[extra_cnt] = tostring(ar)
    elseif par == "workdir" or par == "tmpdir" then
     loader_set_dir(par,ar)
    else
@@ -174,7 +174,7 @@ loader_set_dir=nil
 loader["path"]={}
 
 function loader.path.trim_lead_slashes(path,min_len)
- local p=string.format("%s",path)
+ local p=tostring(path)
  while string.len(p) > min_len and string.sub(p, 1, 1) == loader.slash do
   p=string.sub(p,2)
  end
@@ -182,7 +182,7 @@ function loader.path.trim_lead_slashes(path,min_len)
 end
 
 function loader.path.trim_trail_slashes(path,min_len)
- local p=string.format("%s",path)
+ local p=tostring(path)
  while string.len(p) > min_len and string.sub(p,-1,-1) == loader.slash do
   p=string.sub(p,1,-2)
  end
@@ -190,7 +190,7 @@ function loader.path.trim_trail_slashes(path,min_len)
 end
 
 function loader.path.append_slash(path)
- local p=string.format("%s",path)
+ local p=tostring(path)
  if string.len(p) > 0 and string.sub(p, -1, -1) ~= loader.slash then
   p=p .. loader.slash
  end
@@ -199,8 +199,8 @@ end
 
 -- export path function for path combine
 function loader.path.combine(first, second, ...)
- local f=string.format("%s",first)
- local s=string.format("%s",second)
+ local f=tostring(first)
+ local s=tostring(second)
  local a={ ... }
  f=loader.path.append_slash(loader.path.trim_trail_slashes(f,1))
  s=loader.path.trim_trail_slashes(loader.path.trim_lead_slashes(s,0),0)
@@ -231,7 +231,7 @@ end
 
 function loader_export(name,value)
  local target = assert(io.open(loader.tmpdir .. loader.pathseparator .. name, "w"))
- target:write(string.format("%s",value))
+ target:write(string.format("%s",tostring(value)))
  target:close()
 end
 
@@ -265,4 +265,3 @@ for index,value in ipairs(loader.export) do
   loader_recursive_export(value,target)
  end
 end
-
