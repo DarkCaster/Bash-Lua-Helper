@@ -200,8 +200,10 @@ end
 -- export path function for path combine
 function loader.path.combine(first, second, ...)
  local f=tostring(first)
+ if type(second)=="nil" then second="" end
  local s=tostring(second)
  local a={ ... }
+ if s=="" and #a==0 then return loader.path.trim_trail_slashes(f,1) end
  f=loader.path.append_slash(loader.path.trim_trail_slashes(f,1))
  s=loader.path.trim_trail_slashes(loader.path.trim_lead_slashes(s,0),0)
  local c=f .. s
