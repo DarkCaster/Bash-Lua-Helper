@@ -234,7 +234,7 @@ end
 loader.dataout=loader.tmpdir..loader.pathseparator.."data"..loader.pathseparator
 loader.metaout=loader.tmpdir..loader.pathseparator.."meta"..loader.pathseparator
 
-function loader_export(name,value)
+function loader_data_export(name,value)
  local target = assert(io.open(loader.dataout..name, "w"))
  target:write(string.format("%s",tostring(value)))
  target:close()
@@ -245,9 +245,9 @@ function loader_recursive_export(name,node)
  for key,value in pairs(node) do
   local cur_name=string.format("%s.%s",name,key)
   if type(value) == "boolean" or type(value) == "number" or type(value) == "string" then
-   loader_export(cur_name,value)
+   loader_data_export(cur_name,value)
   elseif type(value) == "table" then
-   loader_export(cur_name,"")
+   loader_data_export(cur_name,"")
    loader_recursive_export(cur_name,value)
   end
  end
@@ -264,9 +264,9 @@ for index,value in ipairs(loader.export) do
  if status == false or type(target) == "nil" then
   loader.log("requested global variable or table with name %s is not exist",value)
  elseif type(target) == "boolean" or type(target) == "number" or type(target) == "string" then
-  loader_export(value,target)
+  loader_data_export(value,target)
  elseif type(target) == "table" then
-  loader_export(value,"")
+  loader_data_export(value,"")
   loader_recursive_export(value,target)
  end
 end
