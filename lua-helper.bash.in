@@ -200,6 +200,13 @@ fi
 lua_temp_dir=`2>/dev/null mktemp -d -p "$lua_temp_dir" -t "lua-helper-XXXXXX"`
 test -z "$lua_temp_dir" && lua_helper_log_error "Failed to create temp directory!" && exit 1
 
+#create meta and data dir
+mkdir "$lua_temp_dir/meta"
+test "$?" != "0" && lua_helper_log_error "Failed to create $lua_temp_dir/meta directory!" && exit 1
+
+mkdir "$lua_temp_dir/data"
+test "$?" != "0" && lua_helper_log_error "Failed to create $lua_temp_dir/data directory!" && exit 1
+
 lua_add_param "-t"
 lua_add_param "$lua_temp_dir"
 lua_add_param "--"
@@ -279,13 +286,13 @@ fi
 declare -A "$lua_result_name"
 
 #create list (multiline variable) with all exported variables names
-declare -r "$lua_export_list_name"="`ls -1 \"$lua_temp_dir\"`"
+declare -r "$lua_export_list_name"="`ls -1 \"$lua_temp_dir/data\"`"
 
 while read target
 do
  #should not occur, if you not touching anything inside loader.tmpdir from lua scripts, so it is disabled
  #lua_helper_check_bad_chars "$target" "filename with exported variable contents \"$target\""
- IFS= read -d '' -r $lua_result_name[$target] < "$lua_temp_dir/$target"
+ IFS= read -d '' -r $lua_result_name[$target] < "$lua_temp_dir/data/$target"
 done <<< "${!lua_export_list_name}"
 
 lua_helper_teardown

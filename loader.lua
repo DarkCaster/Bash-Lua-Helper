@@ -231,8 +231,11 @@ if loader.postexec ~= nil then
  dofile(loader.postexec)
 end
 
+loader.dataout=loader.tmpdir..loader.pathseparator.."data"..loader.pathseparator
+loader.metaout=loader.tmpdir..loader.pathseparator.."meta"..loader.pathseparator
+
 function loader_export(name,value)
- local target = assert(io.open(loader.tmpdir .. loader.pathseparator .. name, "w"))
+ local target = assert(io.open(loader.dataout..name, "w"))
  target:write(string.format("%s",tostring(value)))
  target:close()
 end
