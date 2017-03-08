@@ -240,13 +240,44 @@ function loader_data_export(name,value)
  target:close()
 end
 
+function loader_meta_export(name,value)
+ local target = assert(io.open(loader.metaout..name, "w"))
+ target:write(string.format("%s",tostring(value)))
+ target:close()
+end
+
 function loader_node_export(name,node)
-  if type(node) == "boolean" or type(node) == "number" or type(node) == "string" then
+  if type(node) == "boolean" or type(node) == "number" then
     loader_data_export(name,node)
+    loader_meta_export(name,type(node))
+  elseif type(node) == "string" then
+    loader_data_export(name,node)
+    loader_meta_export(name,"string:"..tostring(string.len(node)))
   elseif type(node) == "table" then
-    loader_data_export(name,"")
+    local limits_set=false
+    local key_min=0
+    local key_max=0
     for key,value in pairs(node) do
+      if type(key)=="number" then
+        if limits_set==true then
+          if key>key_max then
+            key_max=key
+          elseif key<key_min then
+            key_min=key
+          end
+        else
+          limits_set=true
+          key_min=key
+          key_max=key
+        end
+      end
       loader_node_export(string.format("%s.%s",name,tostring(key)),value)
+    end
+    loader_data_export(name,"")
+    if limits_set==true then
+      loader_meta_export(name,"table:"..tostring(key_min)..":"..tostring(key_max+1))
+    else
+      loader_meta_export(name,"table")
     end
   else
     loader.log("failed to export node '%s' with unsupported type '%s'",name,type(node))
