@@ -302,9 +302,27 @@ done <<< "${!lua_export_list_name}"
 lua_helper_teardown
 
 #create helper function to check variable availability
-eval 'check_lua_export () {
+eval 'check_lua_export() {
  [ ! -z "${'${lua_result_name}_meta'[$@]}" ]
 }'
+
+# following line will fix highlight bug in atom editor
+#### eval '''
+
+eval 'get_lua_table_start() {
+  [[ "${'${lua_result_name}_meta'[$@]}" =~ ^table:(.*):(.*) ]] && echo "${BASH_REMATCH[1]}" || echo "0"
+}'
+
+# following line will fix highlight bug in atom editor
+#### eval '''
+
+eval 'get_lua_table_end() {
+  [[ "${'${lua_result_name}_meta'[$@]}" =~ ^table:(.*):(.*) ]] && echo "${BASH_REMATCH[2]}" || echo "0"
+}'
+
+# following line will fix highlight bug in atom editor
+#### eval '''
+
 
 #perform environment cleanup
 unset -f lua_helper_parseopts
