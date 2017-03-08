@@ -303,7 +303,7 @@ lua_helper_teardown
 
 #create helper function to check variable availability
 eval 'check_lua_export () {
- [ ! -z `echo "$'$lua_export_list_name'" | grep -x "$@"` ]
+ [ ! -z "${'${lua_result_name}_meta'[$@]}" ]
 }'
 
 #perform environment cleanup
