@@ -285,6 +285,9 @@ fi
 #see example.bash for usage details
 declare -A "$lua_result_name"
 
+#create associative array with metadata
+declare -A "${lua_result_name}_meta"
+
 #create list (multiline variable) with all exported variables names
 declare -r "$lua_export_list_name"="`ls -1 \"$lua_temp_dir/data\"`"
 
@@ -292,7 +295,8 @@ while read target
 do
  #should not occur, if you not touching anything inside loader.tmpdir from lua scripts, so it is disabled
  #lua_helper_check_bad_chars "$target" "filename with exported variable contents \"$target\""
- IFS= read -d '' -r $lua_result_name[$target] < "$lua_temp_dir/data/$target"
+ IFS= read -d '' -r "$lua_result_name[$target]" < "$lua_temp_dir/data/$target"
+ IFS= read -d '' -r "${lua_result_name}_meta[$target]" < "$lua_temp_dir/meta/$target"
 done <<< "${!lua_export_list_name}"
 
 lua_helper_teardown
