@@ -240,33 +240,30 @@ function loader_data_export(name,value)
  target:close()
 end
 
-function loader_recursive_export(name,node)
- --loader.log("processing table: " .. name)
- for key,value in pairs(node) do
-  local cur_name=string.format("%s.%s",name,key)
-  if type(value) == "boolean" or type(value) == "number" or type(value) == "string" then
-   loader_data_export(cur_name,value)
-  elseif type(value) == "table" then
-   loader_data_export(cur_name,"")
-   loader_recursive_export(cur_name,value)
+function loader_node_export(name,node)
+  if type(node) == "boolean" or type(node) == "number" or type(node) == "string" then
+    loader_data_export(name,node)
+  elseif type(node) == "table" then
+    loader_data_export(name,"")
+    for key,value in pairs(node) do
+      loader_node_export(string.format("%s.%s",name,tostring(key)),value)
+    end
+  else
+    loader.log("failed to export node '%s' with unsupported type '%s'",name,type(node))
   end
- end
 end
 
 for index,value in ipairs(loader.export) do
- local status=false
- local target
- if loader.lua_version.num>=5002000 then
-  status,target=pcall(load("return " .. value))
- else
-  status,target=pcall(loadstring("return " .. value))
- end
- if status == false or type(target) == "nil" then
-  loader.log("requested global variable or table with name %s is not exist",value)
- elseif type(target) == "boolean" or type(target) == "number" or type(target) == "string" then
-  loader_data_export(value,target)
- elseif type(target) == "table" then
-  loader_data_export(value,"")
-  loader_recursive_export(value,target)
- end
+  local status=false
+  local target
+  if loader.lua_version.num>=5002000 then
+    status,target=pcall(load("return " .. value))
+  else
+    status,target=pcall(loadstring("return " .. value))
+  end
+  if status == false or type(target) == "nil" then
+    loader.log("requested global variable or table with name %s is not exist",value)
+  else
+    loader_node_export(value,target)
+  end
 end
