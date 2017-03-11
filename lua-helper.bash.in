@@ -25,7 +25,7 @@ lua_helper_log_error () {
 }
 
 lua_helper_teardown () {
- test ! -z "$lua_temp_dir" && rm -rf "$lua_temp_dir"
+ [[ ! -z $lua_temp_dir ]] && rm -rf "$lua_temp_dir"
  true
 }
 
@@ -88,8 +88,8 @@ lua_helper_check_bad_chars_bash () {
 }
 
 lua_config_script="$1"
-test -z "$lua_config_script" && lua_helper_showusage
-test ! -e "$lua_config_script" && lua_helper_log_error "main config file not found" && lua_helper_showusage
+[[ -z $lua_config_script ]] && lua_helper_showusage
+[[ ! -e $lua_config_script ]] && lua_helper_log_error "main config file not found" && lua_helper_showusage
 lua_config_script=`realpath -s "$lua_config_script"`
 lua_workdir=`dirname $lua_config_script`
 lua_add_param "-c"
@@ -113,16 +113,16 @@ lua_helper_parseopts () {
      lua_add_param "$OPTARG"
    ;;
    "b")
-     test ! -z "$lua_pre_script" && lua_helper_log_error "multiple -b options detected" && lua_helper_showusage
+     [[ ! -z $lua_pre_script ]] && lua_helper_log_error "multiple -b options detected" && lua_helper_showusage
      lua_pre_script="$OPTARG"
-     test ! -e "$lua_pre_script" && lua_helper_log_error "pre script not found" && lua_helper_showusage
+     [[ ! -e $lua_pre_script ]] && lua_helper_log_error "pre script not found" && lua_helper_showusage
      lua_add_param "-pre"
      lua_add_param "$OPTARG"
    ;;
    "a")
-     test ! -z "$lua_post_script" && lua_helper_log_error "multiple -a options detected" && lua_helper_showusage
+     [[ ! -z $lua_post_script ]] && lua_helper_log_error "multiple -a options detected" && lua_helper_showusage
      lua_post_script="$OPTARG"
-     test ! -e "$lua_post_script" && lua_helper_log_error "post script not found" && lua_helper_showusage
+     [[ ! -e $lua_post_script ]] && lua_helper_log_error "post script not found" && lua_helper_showusage
      lua_add_param "-post"
      lua_add_param "$OPTARG"
    ;;
@@ -143,7 +143,7 @@ lua_helper_parseopts () {
    ;;
    "t")
      lua_temp_dir="$OPTARG"
-     test -z "$lua_temp_dir" -o ! -d "$lua_temp_dir" && lua_helper_log_error "incorrect base temp directory provided: $lua_temp_dir" && lua_temp_dir="" && lua_helper_showusage
+     [[ -z $lua_temp_dir || ! -d $lua_temp_dir ]] && lua_helper_log_error "incorrect base temp directory provided: $lua_temp_dir" && lua_temp_dir="" && lua_helper_showusage
    ;;
    "y")
      lua_min_version="$OPTARG"
@@ -176,7 +176,7 @@ lua_helper_parseopts () {
   esac
  done
  lua_params_shift=$((OPTIND-1))
- test -z "$lua_workdir" && lua_helper_log_error "workdir is empty string" && lua_helper_showusage
+ [[ -z $lua_workdir ]] && lua_helper_log_error "workdir is empty string" && lua_helper_showusage
  lua_add_param "-w"
  lua_add_param "$lua_workdir"
 }
@@ -189,23 +189,23 @@ if [ -z "$lua_temp_dir" ]; then
  #detect temp directory
  for target in "$TMPDIR" "/tmp" "$XDG_RUNTIME_DIR"
  do
-  test -z "$target" -o ! -d "$target" -o -z "`2>/dev/null df -P -t tmpfs \"$target\"`" && continue
+  [[ -z "$target" || ! -d $target || -z `2>/dev/null df -P -t tmpfs "$target"` ]] && continue
   lua_temp_dir="$target"
   break
  done
- test -z "$lua_temp_dir" && lua_temp_dir="/tmp"
+ [[ -z $lua_temp_dir ]] && lua_temp_dir="/tmp"
 fi
 
 #create real cache dir
 lua_temp_dir=`2>/dev/null mktemp -d -p "$lua_temp_dir" -t "lua-helper-XXXXXX"`
-test -z "$lua_temp_dir" && lua_helper_log_error "Failed to create temp directory!" && exit 1
+[[ -z $lua_temp_dir ]] && lua_helper_log_error "Failed to create temp directory!" && exit 1
 
 #create meta and data dir
 mkdir "$lua_temp_dir/meta"
-test "$?" != "0" && lua_helper_log_error "Failed to create $lua_temp_dir/meta directory!" && exit 1
+[[ $? != 0 ]] && lua_helper_log_error "Failed to create $lua_temp_dir/meta directory!" && exit 1
 
 mkdir "$lua_temp_dir/data"
-test "$?" != "0" && lua_helper_log_error "Failed to create $lua_temp_dir/data directory!" && exit 1
+[[ $? != 0 ]] && lua_helper_log_error "Failed to create $lua_temp_dir/data directory!" && exit 1
 
 lua_add_param "-t"
 lua_add_param "$lua_temp_dir"
@@ -216,13 +216,13 @@ lua_probe_version() {
  local min_version=( $2 )
  local max_version=( $3 )
  lua_act_version=`2>&1 "$lua_binary" -v | sed -n "s|^Lua\s\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\).*\$|\1 \2 \3|p"`
- test -z "$lua_act_version" && return 1
+ [[ -z $lua_act_version ]] && return 1
  lua_act_version=( $lua_act_version )
  local cnt="-1"
  for act_num in "${lua_act_version[@]}"
  do
   cnt=$((cnt+1))
-  test "$act_num" -ge "${min_version[$cnt]}" -a "$act_num" -le "${max_version[$cnt]}" && continue || return 1
+  [[ $act_num -ge ${min_version[$cnt]} && $act_num -le ${max_version[$cnt]} ]] && continue || return 1
  done
  return 0
 }
@@ -231,11 +231,11 @@ lua_probe_binary() {
  local hints=( $1 )
  local min_version="$2"
  local max_version="$3"
- test ! -z "$lua_binary" && hints=( "$lua_binary" ) && lua_binary=""
+ [[ ! -z $lua_binary ]] && hints=( "$lua_binary" ) && lua_binary=""
  min_version=`echo "$min_version" | sed -n "s|\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)|\1 \2 \3|p"`
- test -z "$min_version" && lua_helper_log_error "incorrect minimum version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
+ [[ -z $min_version ]] && lua_helper_log_error "incorrect minimum version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
  max_version=`echo "$max_version" | sed -n "s|\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)|\1 \2 \3|p"`
- test -z "$max_version" && lua_helper_log_error "incorrect maximum version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
+ [[ -z $max_version ]] && lua_helper_log_error "incorrect maximum version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
  for hint in "${hints[@]}"
  do
   hint=`2>/dev/null which "$hint"`
@@ -269,7 +269,7 @@ else
 fi
 
 
-test -z "$lua_binary" && lua_helper_log_error "failed to detect lua interpreter with proper version!" && exit 1
+[[ -z $lua_binary ]] && lua_helper_log_error "failed to detect lua interpreter with proper version!" && exit 1
 #debug
 #echo "using lua binary: $lua_binary"
 
