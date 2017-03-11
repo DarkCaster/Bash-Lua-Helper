@@ -215,9 +215,7 @@ lua_probe_version() {
  local lua_binary="$1"
  local min_version=( $2 )
  local max_version=( $3 )
- lua_act_version=`2>&1 "$lua_binary" -v | sed -n "s|^Lua\s\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\).*\$|\1 \2 \3|p"`
- [[ -z $lua_act_version ]] && return 1
- lua_act_version=( $lua_act_version )
+ [[ `2>&1 "$lua_binary" -v` =~ ^"Lua"[[:space:]]([0-9]*)"."([0-9]*)"."([0-9]*).*$ ]] && lua_act_version=( "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}" ) || return 1
  local cnt="-1"
  for act_num in "${lua_act_version[@]}"
  do
@@ -232,9 +230,9 @@ lua_probe_binary() {
  local min_version="$2"
  local max_version="$3"
  [[ ! -z $lua_binary ]] && hints=( "$lua_binary" ) && lua_binary=""
- min_version=`echo "$min_version" | sed -n "s|\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)|\1 \2 \3|p"`
+ [[ $min_version =~ ^([0-9]*)"."([0-9]*)"."([0-9]*)$ ]] && min_version="${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[3]}" || min_version=""
  [[ -z $min_version ]] && lua_helper_log_error "incorrect minimum version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
- max_version=`echo "$max_version" | sed -n "s|\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)|\1 \2 \3|p"`
+ [[ $max_version =~ ^([0-9]*)"."([0-9]*)"."([0-9]*)$ ]] && max_version="${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[3]}" || max_version=""
  [[ -z $max_version ]] && lua_helper_log_error "incorrect maximum version string! (it must be a 3 numbers delimited with dots, for example 5.2.0 or 5.3.1)" && exit 1
  for hint in "${hints[@]}"
  do
