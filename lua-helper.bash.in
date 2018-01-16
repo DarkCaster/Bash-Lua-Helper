@@ -288,7 +288,7 @@ declare -A "${lua_result_name}_meta"
 
 #create list (multiline variable) with all exported variables names
 declare -r "$lua_export_list_name"="`ls -1 \"$lua_temp_dir/data\"`"
-if [[ ! -z $lua_export_list_name ]]; then
+if [[ ! -z ${!lua_export_list_name} ]]; then
   while read target
   do
     #should not occur, if you not touching anything inside loader.tmpdir from lua scripts, so it is disabled
