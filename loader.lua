@@ -213,6 +213,17 @@ function loader.path.combine(first, second, ...)
  return c
 end
 
+-- define some table management logic
+loader["table"]={}
+
+function loader.table.remove_value(target, value)
+  assert(type(target)=="table", "target must be a table!")
+  for i = #target, 1, -1 do
+    if target[i]==value then table.remove(target, i) end
+  end
+  return target
+end
+
 -- TODO: define some config verification logic
 
 -- execute pre-script
