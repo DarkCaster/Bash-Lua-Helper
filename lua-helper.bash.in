@@ -91,7 +91,7 @@ lua_config_script="$1"
 [[ -z $lua_config_script ]] && lua_helper_showusage
 [[ ! -e $lua_config_script ]] && lua_helper_log_error "main config file not found" && lua_helper_showusage
 lua_config_script=`realpath -s "$lua_config_script"`
-lua_workdir=`dirname $lua_config_script`
+lua_workdir=`dirname "$lua_config_script"`
 lua_add_param "-c"
 lua_add_param "$lua_config_script"
 shift 1
