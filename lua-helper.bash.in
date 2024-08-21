@@ -248,7 +248,7 @@ lua_probe_binary() {
 
 if [[ -z $lua_min_version && -z $lua_max_version ]]; then
  lua_min_version="5.1.0"
- lua_max_version="5.3.999"
+ lua_max_version="5.4.999"
 elif [[ -z $lua_min_version && ! -z $lua_max_version ]]; then
  lua_min_version="0.0.0"
  lua_helper_log_error "restricting lua max version only, it may not work as intended if your lua interpreter is too old"
